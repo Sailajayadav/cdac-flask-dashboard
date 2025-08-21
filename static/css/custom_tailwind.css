@@ -1,0 +1,19 @@
+/* Custom styles for dashboard cards, table, and layout */
+.card {
+  @apply bg-white rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105;
+}
+.header {
+  @apply text-center py-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-b-lg mb-8 shadow-lg;
+}
+.data-table {
+  @apply w-full border-collapse rounded-lg overflow-hidden shadow;
+}
+.data-table th, .data-table td {
+  @apply px-4 py-2 border-b text-center;
+}
+.table-container {
+  @apply bg-white rounded-lg shadow p-4;
+}
+.filter-bar {
+  @apply flex flex-wrap gap-4 justify-center items-center mb-8 p-4 bg-white rounded-lg shadow;
+}

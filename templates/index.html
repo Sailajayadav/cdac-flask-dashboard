@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBL Data Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-100 min-h-screen">
+    <div class="container mx-auto px-4">
+        <header class="text-center py-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-b-lg mb-8 shadow-lg">
+            <h1 class="text-4xl font-bold mb-2">WBL Data Dashboard</h1>
+            <p class="text-lg">Interactive analytics of participant data.</p>
+        </header>
+        <main>
+            <div class="flex flex-wrap gap-4 justify-center items-center mb-8 p-4 bg-white rounded-lg shadow">
+                <div>
+                    <label for="state-dropdown" class="font-semibold mr-2">State:</label>
+                    <select id="state-dropdown" class="border rounded px-2 py-1">
+                        {% for state in states %}
+                            <option value="{{ state }}">{{ state }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="cohort-dropdown" class="font-semibold mr-2">Cohort:</label>
+                    <select id="cohort-dropdown" class="border rounded px-2 py-1">
+                        {% for cohort in cohorts %}
+                            <option value="{{ cohort }}">{{ cohort }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="gender-dropdown" class="font-semibold mr-2">Gender:</label>
+                    <select id="gender-dropdown" class="border rounded px-2 py-1">
+                        {% for gender in genders %}
+                            <option value="{{ gender }}">{{ gender }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="technology-dropdown" class="font-semibold mr-2">Technology:</label>
+                    <select id="technology-dropdown" class="border rounded px-2 py-1">
+                        {% for technology in technologies %}
+                            <option value="{{ technology }}">{{ technology }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="employment-status-dropdown" class="font-semibold mr-2">Employment Status:</label>
+                    <select id="employment-status-dropdown" class="border rounded px-2 py-1">
+                        {% for status in employment_statuses %}
+                            <option value="{{ status }}">{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105">
+                    <h3 class="text-xl font-semibold mb-4">State-wise Participant Count</h3>
+                    <div id="state-wise-participants-chart"></div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105">
+                    <h3 class="text-xl font-semibold mb-4">Employment Status Distribution</h3>
+                    <div id="employment-status-chart"></div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105">
+                    <h3 class="text-xl font-semibold mb-4">Technology Domain Distribution</h3>
+                    <div id="technology-distribution-chart"></div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105">
+                    <h3 class="text-xl font-semibold mb-4">Gender and Category Analysis</h3>
+                    <div id="gender-category-analysis-chart"></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
+                <h3 class="text-xl font-semibold mb-4">Cohort Details Table</h3>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div id="cohort-details-table"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        const stateDropdown = document.getElementById('state-dropdown');
+        const cohortDropdown = document.getElementById('cohort-dropdown');
+        const genderDropdown = document.getElementById('gender-dropdown');
+        const technologyDropdown = document.getElementById('technology-dropdown');
+        const employmentStatusDropdown = document.getElementById('employment-status-dropdown');
+        function updateVisualizations() {
+            const params = new URLSearchParams({
+                state: stateDropdown.value,
+                cohort: cohortDropdown.value,
+                gender: genderDropdown.value,
+                technology: technologyDropdown.value,
+                employment_status: employmentStatusDropdown.value
+            });
+            axios.get(`/api/data?${params.toString()}`)
+                .then(response => {
+                    const data = response.data;
+                    Plotly.newPlot('state-wise-participants-chart', JSON.parse(data.state_chart_data).data, JSON.parse(data.state_chart_data).layout);
+                    Plotly.newPlot('employment-status-chart', JSON.parse(data.employment_chart_data).data, JSON.parse(data.employment_chart_data).layout);
+                    Plotly.newPlot('technology-distribution-chart', JSON.parse(data.technology_chart_data).data, JSON.parse(data.technology_chart_data).layout);
+                    Plotly.newPlot('gender-category-analysis-chart', JSON.parse(data.gender_category_chart_data).data, JSON.parse(data.gender_category_chart_data).layout);
+                    const tableContainer = document.getElementById('cohort-details-table');
+                    tableContainer.innerHTML = '';
+                    if (data.cohort_table_data.length > 0) {
+                        let tableHTML = `<table class=\"data-table\"><thead><tr>
+                                            <th>Cohort</th>
+                                            <th>Participant Count</th>
+                                        </tr></thead><tbody>`;
+                        data.cohort_table_data.forEach(row => {
+                            tableHTML += `<tr>
+                                                <td>${row.Cohort}</td>
+                                                <td>${row['Participant Count']}</td>
+                                            </tr>`;
+                        });
+                        tableHTML += `</tbody></table>`;
+                        tableContainer.innerHTML = tableHTML;
+                    } else {
+                        tableContainer.innerHTML = `<p class=\"text-center text-gray-500\">No data available for the selected filters.</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data for visualizations:', error);
+                });
+        }
+        stateDropdown.addEventListener('change', updateVisualizations);
+        cohortDropdown.addEventListener('change', updateVisualizations);
+        genderDropdown.addEventListener('change', updateVisualizations);
+        technologyDropdown.addEventListener('change', updateVisualizations);
+        employmentStatusDropdown.addEventListener('change', updateVisualizations);
+        document.addEventListener('DOMContentLoaded', () => {
+            updateVisualizations();
+        });
+    </script>
+</body>
+</html>
