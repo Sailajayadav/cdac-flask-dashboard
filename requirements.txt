@@ -2,4 +2,4 @@ Flask==2.3.2
 gunicorn==20.1.0
 pandas==2.0.3
 plotly==5.15.0
-dash==2.11.1
+dash==2.18.1
