@@ -99,34 +99,37 @@
                 employment_status: employmentStatusDropdown.value
             });
             axios.get(`/api/data?${params.toString()}`)
-                .then(response => {
-                    const data = response.data;
-                    Plotly.newPlot('state-wise-participants-chart', JSON.parse(data.state_chart_data).data, JSON.parse(data.state_chart_data).layout);
-                    Plotly.newPlot('employment-status-chart', JSON.parse(data.employment_chart_data).data, JSON.parse(data.employment_chart_data).layout);
-                    Plotly.newPlot('technology-distribution-chart', JSON.parse(data.technology_chart_data).data, JSON.parse(data.technology_chart_data).layout);
-                    Plotly.newPlot('gender-category-analysis-chart', JSON.parse(data.gender_category_chart_data).data, JSON.parse(data.gender_category_chart_data).layout);
-                    const tableContainer = document.getElementById('cohort-details-table');
-                    tableContainer.innerHTML = '';
-                    if (data.cohort_table_data.length > 0) {
-                        let tableHTML = `<table class=\"data-table\"><thead><tr>
-                                            <th>Cohort</th>
-                                            <th>Participant Count</th>
-                                        </tr></thead><tbody>`;
-                        data.cohort_table_data.forEach(row => {
-                            tableHTML += `<tr>
-                                                <td>${row.Cohort}</td>
-                                                <td>${row['Participant Count']}</td>
-                                            </tr>`;
-                        });
-                        tableHTML += `</tbody></table>`;
-                        tableContainer.innerHTML = tableHTML;
-                    } else {
-                        tableContainer.innerHTML = `<p class=\"text-center text-gray-500\">No data available for the selected filters.</p>`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching data for visualizations:', error);
-                });
+            .then(response => {
+                const data = response.data;
+
+                Plotly.newPlot('state-wise-participants-chart', data.state_chart_data.data, data.state_chart_data.layout);
+                Plotly.newPlot('employment-status-chart', data.employment_chart_data.data, data.employment_chart_data.layout);
+                Plotly.newPlot('technology-distribution-chart', data.technology_chart_data.data, data.technology_chart_data.layout);
+                Plotly.newPlot('gender-category-analysis-chart', data.gender_category_chart_data.data, data.gender_category_chart_data.layout);
+
+                const tableContainer = document.getElementById('cohort-details-table');
+                tableContainer.innerHTML = '';
+                if (data.cohort_table_data.length > 0) {
+                    let tableHTML = `<table class="data-table"><thead><tr>
+                                        <th>Cohort</th>
+                                        <th>Participant Count</th>
+                                    </tr></thead><tbody>`;
+                    data.cohort_table_data.forEach(row => {
+                        tableHTML += `<tr>
+                                        <td>${row.Cohort}</td>
+                                        <td>${row['Participant Count']}</td>
+                                    </tr>`;
+                    });
+                    tableHTML += `</tbody></table>`;
+                    tableContainer.innerHTML = tableHTML;
+                } else {
+                    tableContainer.innerHTML = `<p class="text-center text-gray-500">No data available for the selected filters.</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data for visualizations:', error);
+            });
+
         }
         stateDropdown.addEventListener('change', updateVisualizations);
         cohortDropdown.addEventListener('change', updateVisualizations);
