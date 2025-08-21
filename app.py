@@ -3,19 +3,15 @@ import pandas as pd
 from flask import Flask, render_template, jsonify, request
 import plotly.express as px
 from flask_cors import CORS
+import json
 
-# Define the base directory for the Flask app
+# --- Flask App Setup ---
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-# Create the Flask application instance
 app = Flask(__name__, static_folder='static')
 CORS(app)
 
-# --- Data Loading and Cleaning ---
-basedir = os.path.abspath(os.path.dirname(__file__))
-xlsx_path = os.path.join(basedir, "WBL_CDAC_Hyd_August_19_2025.xlsx")  # change filename
-
-# read all sheets as dict of DataFrames
+# --- Load and Clean Data ---
+xlsx_path = os.path.join(basedir, "WBL_CDAC_Hyd_August_19_2025.xlsx")
 df = pd.read_excel(xlsx_path, engine="openpyxl")
 
 relevant_columns = ['State', 'Employment Status', 'Cohort', 'Technology', 'Gender', 'Category']
@@ -24,25 +20,24 @@ for col in relevant_columns:
         df[col] = df[col].fillna('Unknown')
         df[col] = df[col].astype('category')
 
-# --- Helper Functions for Visualizations ---
+# --- Helper Functions ---
 def create_state_wise_participants_chart(df_filtered):
+    if df_filtered.empty:
+        fig = px.bar(x=['No Data'], y=[0], title='State-wise Participant Count', template='plotly_white')
+        return fig.to_json()
+    
     state_counts = df_filtered['State'].value_counts().reset_index()
     state_counts.columns = ['State', 'Count']
+    state_counts['Count'] = pd.to_numeric(state_counts['Count'], errors='coerce').fillna(0)
     fig = px.bar(
-        state_counts,
-        x='State',
-        y='Count',
+        state_counts, x='State', y='Count',
         title='State-wise Participant Count',
         color='Count',
         color_continuous_scale='viridis',
         template='plotly_white'
     )
-    fig.update_traces(marker=dict(line=dict(width=2, color='white'),
-                                  colorbar=dict(thickness=20)),
-                      marker_line_width=2,
-                      marker_line_color='rgba(0,0,0,0.1)',
-                      hoverinfo='y',
-                      width=0.6)
+    fig.update_traces(marker=dict(line=dict(width=2, color='white')),
+                      marker_line_width=2, marker_line_color='rgba(0,0,0,0.1)', hoverinfo='y', width=0.6)
     fig.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
@@ -55,90 +50,85 @@ def create_state_wise_participants_chart(df_filtered):
     return fig.to_json()
 
 def create_employment_status_chart(df_filtered):
+    if df_filtered.empty:
+        fig = px.pie(values=[1], names=['No Data'], title='Employment Status Distribution', template='plotly_white')
+        return fig.to_json()
+    
     employment_counts = df_filtered['Employment Status'].value_counts().reset_index()
     employment_counts.columns = ['Employment Status', 'Count']
+    employment_counts['Count'] = pd.to_numeric(employment_counts['Count'], errors='coerce').fillna(0)
     fig = px.pie(
-        employment_counts,
-        values='Count',
-        names='Employment Status',
-        title='Employment Status Distribution',
-        color_discrete_sequence=px.colors.sequential.RdPu,
+        employment_counts, values='Count', names='Employment Status',
+        title='Employment Status Distribution', color_discrete_sequence=px.colors.sequential.RdPu,
         template='plotly_white'
     )
     fig.update_traces(textinfo='percent+label', pull=[0.05]*len(employment_counts),
                       marker=dict(line=dict(color='white', width=2)),
-                      hoverinfo='label+percent',
-                      rotation=45)
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Poppins, sans-serif', size=16),
-        margin=dict(t=60, b=40, l=40, r=40),
-        transition={'duration': 500, 'easing': 'cubic-in-out'}
-    )
+                      hoverinfo='label+percent', rotation=45)
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                      font=dict(family='Poppins, sans-serif', size=16),
+                      margin=dict(t=60, b=40, l=40, r=40),
+                      transition={'duration': 500, 'easing': 'cubic-in-out'})
     return fig.to_json()
 
 def create_technology_distribution_chart(df_filtered):
+    if df_filtered.empty:
+        fig = px.bar(x=['No Data'], y=[0], title='Technology Domain Distribution', template='plotly_white')
+        return fig.to_json()
+    
     technology_counts = df_filtered['Technology'].value_counts().reset_index()
     technology_counts.columns = ['Technology', 'Count']
+    technology_counts['Count'] = pd.to_numeric(technology_counts['Count'], errors='coerce').fillna(0)
     fig = px.bar(
-        technology_counts,
-        x='Technology',
-        y='Count',
+        technology_counts, x='Technology', y='Count',
         title='Technology Domain Distribution',
         color='Count',
         color_continuous_scale='plasma',
         template='plotly_white'
     )
-    fig.update_traces(marker=dict(line=dict(width=2, color='white'),
-                                  colorbar=dict(thickness=20)),
-                      marker_line_width=2,
-                      marker_line_color='rgba(0,0,0,0.1)',
-                      hoverinfo='y',
-                      width=0.6)
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Poppins, sans-serif', size=16),
-        margin=dict(t=60, b=40, l=40, r=40),
-        xaxis=dict(showgrid=False, zeroline=False),
-        yaxis=dict(showgrid=True, gridcolor='rgba(200,200,255,0.2)'),
-        transition={'duration': 500, 'easing': 'cubic-in-out'}
-    )
+    fig.update_traces(marker=dict(line=dict(width=2, color='white')),
+                      marker_line_width=2, marker_line_color='rgba(0,0,0,0.1)', hoverinfo='y', width=0.6)
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)',
+                      paper_bgcolor='rgba(0,0,0,0)',
+                      font=dict(family='Poppins, sans-serif', size=16),
+                      margin=dict(t=60, b=40, l=40, r=40),
+                      xaxis=dict(showgrid=False, zeroline=False),
+                      yaxis=dict(showgrid=True, gridcolor='rgba(200,200,255,0.2)'),
+                      transition={'duration': 500, 'easing': 'cubic-in-out'})
     return fig.to_json()
 
 def create_gender_category_analysis(df_filtered):
+    if df_filtered.empty:
+        fig = px.bar(x=['No Data'], y=[0], title='Gender and Category Analysis', template='plotly_white')
+        return fig.to_json()
+    
     gender_category_counts = df_filtered.groupby(['Gender', 'Category']).size().reset_index(name='Count')
+    gender_category_counts['Count'] = pd.to_numeric(gender_category_counts['Count'], errors='coerce').fillna(0)
     fig = px.bar(
         gender_category_counts,
-        x='Gender',
-        y='Count',
-        color='Category',
-        barmode='group',
-        title='Gender and Category Analysis',
+        x='Gender', y='Count', color='Category',
+        barmode='group', title='Gender and Category Analysis',
         template='plotly_white'
     )
     fig.update_traces(marker_line_width=2, marker_line_color='white', width=0.6)
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Poppins, sans-serif', size=16),
-        margin=dict(t=60, b=40, l=40, r=40),
-        xaxis=dict(showgrid=False, zeroline=False),
-        yaxis=dict(showgrid=True, gridcolor='rgba(200,200,255,0.2)'),
-        transition={'duration': 500, 'easing': 'cubic-in-out'}
-    )
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)',
+                      paper_bgcolor='rgba(0,0,0,0)',
+                      font=dict(family='Poppins, sans-serif', size=16),
+                      margin=dict(t=60, b=40, l=40, r=40),
+                      xaxis=dict(showgrid=False, zeroline=False),
+                      yaxis=dict(showgrid=True, gridcolor='rgba(200,200,255,0.2)'),
+                      transition={'duration': 500, 'easing': 'cubic-in-out'})
     return fig.to_json()
 
 def create_cohort_details_table(df_filtered):
+    if df_filtered.empty:
+        return []
     cohort_summary = df_filtered.groupby('Cohort').size().reset_index(name='Participant Count')
     return cohort_summary.to_dict('records')
 
-# --- Routes and Views ---
-
+# --- Routes ---
 @app.route("/excel")
 def excel_view():
-
     return df.to_html(classes="table table-striped", index=False)
 
 @app.route('/')
@@ -177,13 +167,14 @@ def get_data():
         filtered_df = filtered_df[filtered_df['Employment Status'] == selected_employment_status]
 
     response = {
-        'state_chart_data': create_state_wise_participants_chart(filtered_df),
-        'employment_chart_data': create_employment_status_chart(filtered_df),
-        'technology_chart_data': create_technology_distribution_chart(filtered_df),
-        'gender_category_chart_data': create_gender_category_analysis(filtered_df),
+        'state_chart_data': json.loads(create_state_wise_participants_chart(filtered_df)),
+        'employment_chart_data': json.loads(create_employment_status_chart(filtered_df)),
+        'technology_chart_data': json.loads(create_technology_distribution_chart(filtered_df)),
+        'gender_category_chart_data': json.loads(create_gender_category_analysis(filtered_df)),
         'cohort_table_data': create_cohort_details_table(filtered_df)
     }
     return jsonify(response)
 
+# --- Run App ---
 if __name__ == '__main__':
     app.run(debug=True)
