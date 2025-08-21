@@ -39,25 +39,23 @@ def create_state_wise_participants_chart(df_filtered):
         fig = px.bar(x=['No Data'], y=[0], title='State-wise Participant Count', template='plotly_white')
         return fig_to_serializable(fig.to_dict())
 
-    state_counts = df_filtered['State'].value_counts().reset_index()
-    state_counts.columns = ['State', 'Count']
-    state_counts['Count'] = state_counts['Count'].astype(int).tolist()  # convert to list explicitly
+    state_counts = df_filtered['State'].value_counts()
+    names_list = state_counts.index.tolist()
+    values_list = state_counts.values.tolist()
 
     fig = px.bar(
-        state_counts, x='State', y='Count',
+        x=names_list,
+        y=values_list,
         title='State-wise Participant Count',
-        color='Count',
+        color=values_list,
         color_continuous_scale='viridis',
         template='plotly_white'
     )
-    fig.update_traces(marker=dict(line=dict(width=2, color='white')),
-                      hoverinfo='y', width=0.6)
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Poppins, sans-serif', size=16),
-        margin=dict(t=60, b=40, l=40, r=40)
-    )
+    fig.update_traces(marker=dict(line=dict(width=2, color='white')), hoverinfo='y', width=0.6)
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)',
+                      paper_bgcolor='rgba(0,0,0,0)',
+                      font=dict(family='Poppins, sans-serif', size=16),
+                      margin=dict(t=60, b=40, l=40, r=40))
     return fig_to_serializable(fig.to_dict())
 
 def create_employment_status_chart(df_filtered):
@@ -65,11 +63,9 @@ def create_employment_status_chart(df_filtered):
         fig = px.pie(values=[1], names=['No Data'], title='Employment Status Distribution', template='plotly_white')
         return fig_to_serializable(fig.to_dict())
 
-    employment_counts = df_filtered['Employment Status'].value_counts().reset_index()
-    employment_counts.columns = ['Employment Status', 'Count']
-    # ensure Count is plain Python list
-    values_list = employment_counts['Count'].astype(int).tolist()
-    names_list = employment_counts['Employment Status'].tolist()
+    employment_counts = df_filtered['Employment Status'].value_counts()
+    names_list = employment_counts.index.tolist()
+    values_list = employment_counts.values.tolist()
 
     fig = px.pie(
         names=names_list,
@@ -78,15 +74,15 @@ def create_employment_status_chart(df_filtered):
         color_discrete_sequence=px.colors.sequential.RdPu,
         template='plotly_white'
     )
-    fig.update_traces(textinfo='percent+label', pull=[0.05]*len(values_list),
+    fig.update_traces(textinfo='percent+label',
+                      pull=[0.05]*len(values_list),
                       marker=dict(line=dict(color='white', width=2)),
-                      hoverinfo='label+percent', rotation=45)
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Poppins, sans-serif', size=16),
-        margin=dict(t=60, b=40, l=40, r=40)
-    )
+                      hoverinfo='label+percent',
+                      rotation=45)
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)',
+                      paper_bgcolor='rgba(0,0,0,0)',
+                      font=dict(family='Poppins, sans-serif', size=16),
+                      margin=dict(t=60, b=40, l=40, r=40))
     return fig_to_serializable(fig.to_dict())
 
 def create_technology_distribution_chart(df_filtered):
@@ -94,27 +90,23 @@ def create_technology_distribution_chart(df_filtered):
         fig = px.bar(x=['No Data'], y=[0], title='Technology Domain Distribution', template='plotly_white')
         return fig_to_serializable(fig.to_dict())
 
-    tech_counts = df_filtered['Technology'].value_counts().reset_index()
-    tech_counts.columns = ['Technology', 'Count']
-    tech_counts['Count'] = tech_counts['Count'].astype(int).tolist()
-    tech_counts['Technology'] = tech_counts['Technology'].tolist()
+    tech_counts = df_filtered['Technology'].value_counts()
+    names_list = tech_counts.index.tolist()
+    values_list = tech_counts.values.tolist()
 
     fig = px.bar(
-        x=tech_counts['Technology'],
-        y=tech_counts['Count'],
+        x=names_list,
+        y=values_list,
         title='Technology Domain Distribution',
-        color=tech_counts['Count'],
+        color=values_list,
         color_continuous_scale='plasma',
         template='plotly_white'
     )
-    fig.update_traces(marker=dict(line=dict(width=2, color='white')),
-                      hoverinfo='y', width=0.6)
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Poppins, sans-serif', size=16),
-        margin=dict(t=60, b=40, l=40, r=40)
-    )
+    fig.update_traces(marker=dict(line=dict(width=2, color='white')), hoverinfo='y', width=0.6)
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)',
+                      paper_bgcolor='rgba(0,0,0,0)',
+                      font=dict(family='Poppins, sans-serif', size=16),
+                      margin=dict(t=60, b=40, l=40, r=40))
     return fig_to_serializable(fig.to_dict())
 
 def create_gender_category_analysis(df_filtered):
@@ -122,34 +114,32 @@ def create_gender_category_analysis(df_filtered):
         fig = px.bar(x=['No Data'], y=[0], title='Gender and Category Analysis', template='plotly_white')
         return fig_to_serializable(fig.to_dict())
 
-    gender_category_counts = df_filtered.groupby(['Gender', 'Category']).size().reset_index(name='Count')
-    gender_category_counts['Count'] = gender_category_counts['Count'].astype(int).tolist()
-    gender_category_counts['Gender'] = gender_category_counts['Gender'].tolist()
-    gender_category_counts['Category'] = gender_category_counts['Category'].tolist()
+    gender_category_counts = df_filtered.groupby(['Gender', 'Category']).size()
+    names = list(gender_category_counts.index)
+    counts = gender_category_counts.values.tolist()
+    # Split names into separate lists for plotting
+    genders = [g for g, c in names]
+    categories = [c for g, c in names]
 
     fig = px.bar(
-        gender_category_counts,
-        x='Gender',
-        y='Count',
-        color='Category',
+        x=genders,
+        y=counts,
+        color=categories,
         barmode='group',
         title='Gender and Category Analysis',
         template='plotly_white'
     )
     fig.update_traces(marker_line_width=2, marker_line_color='white', width=0.6)
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Poppins, sans-serif', size=16),
-        margin=dict(t=60, b=40, l=40, r=40)
-    )
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)',
+                      paper_bgcolor='rgba(0,0,0,0)',
+                      font=dict(family='Poppins, sans-serif', size=16),
+                      margin=dict(t=60, b=40, l=40, r=40))
     return fig_to_serializable(fig.to_dict())
 
 def create_cohort_details_table(df_filtered):
     if df_filtered.empty:
         return []
     cohort_summary = df_filtered.groupby('Cohort').size().reset_index(name='Participant Count')
-    # convert any NumPy int64 to Python int
     cohort_summary['Participant Count'] = cohort_summary['Participant Count'].astype(int)
     return cohort_summary.to_dict('records')
 
