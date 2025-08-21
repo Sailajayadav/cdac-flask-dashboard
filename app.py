@@ -13,11 +13,7 @@ app = Flask(__name__, static_folder='static')
 csv_path = os.path.join(basedir, 'WBL_CDAC_Hyd_August_19_2025.csv')
 df = pd.read_csv(csv_path, skiprows=1)
 df.columns = df.columns.str.strip()
-df.rename(columns={
-    'Cohort with Level': 'Cohort',
-    'Technology Area': 'Technology',
-    'Present Status (Employed/Unemployed/Ongoing/Higher Studies)': 'Employment Status'
-}, inplace=True)
+
 relevant_columns = ['State', 'Employment Status', 'Cohort', 'Technology', 'Gender', 'Category']
 for col in relevant_columns:
     if col in df.columns:
