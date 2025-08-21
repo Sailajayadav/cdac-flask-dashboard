@@ -101,7 +101,8 @@
             axios.get(`/api/data?${params.toString()}`)
             .then(response => {
                 const data = response.data;
-
+                console.log('Data received for visualizations:', data);
+                
                 Plotly.newPlot('state-wise-participants-chart', data.state_chart_data.data, data.state_chart_data.layout);
                 Plotly.newPlot('employment-status-chart', data.employment_chart_data.data, data.employment_chart_data.layout);
                 Plotly.newPlot('technology-distribution-chart', data.technology_chart_data.data, data.technology_chart_data.layout);
