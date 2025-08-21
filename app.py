@@ -2,12 +2,14 @@ import os
 import pandas as pd
 from flask import Flask, render_template, jsonify, request
 import plotly.express as px
+from flask_cors import CORS
 
 # Define the base directory for the Flask app
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Create the Flask application instance
 app = Flask(__name__, static_folder='static')
+CORS(app)
 
 # --- Data Loading and Cleaning ---
 basedir = os.path.abspath(os.path.dirname(__file__))
