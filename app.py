@@ -22,10 +22,18 @@ for col in relevant_columns:
 
 # --- Helper Functions ---
 def fig_to_serializable(fig_dict):
-    """Convert any NumPy arrays in a Plotly figure dict to lists."""
+    """Convert any NumPy arrays or packed binary data in a Plotly figure dict to lists."""
     def convert(obj):
         if isinstance(obj, dict):
-            return {k: convert(v) for k, v in obj.items()}
+            if 'dtype' in obj and 'bdata' in obj:
+                # Unpack Plotly's binary-packed array
+                bdata = base64.b64decode(obj['bdata'])
+                arr = np.frombuffer(bdata, dtype=obj['dtype'])
+                if 'shape' in obj:
+                    arr = arr.reshape(obj['shape'])
+                return arr.tolist()
+            else:
+                return {k: convert(v) for k, v in obj.items()}
         elif isinstance(obj, list):
             return [convert(i) for i in obj]
         elif isinstance(obj, (np.ndarray, pd.Series)):
