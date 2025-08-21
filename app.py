@@ -4,7 +4,7 @@ from flask import Flask, render_template, jsonify, request
 import plotly.express as px
 from flask_cors import CORS
 import numpy as np
-
+import base64
 # --- Flask App Setup ---
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, static_folder='static')
