@@ -11,7 +11,7 @@ app = Flask(__name__, static_folder='static')
 
 # --- Data Loading and Cleaning ---
 csv_path = os.path.join(basedir, 'WBL_CDAC_Hyd_August_19_2025.csv')
-df = pd.read_csv(csv_path, skiprows=1, header=0)
+df = pd.read_csv(csv_path, skiprows=1)
 df.columns = df.columns.str.strip()
 df.rename(columns={
     'Cohort with Level': 'Cohort',
