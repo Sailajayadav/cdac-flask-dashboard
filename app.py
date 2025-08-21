@@ -10,9 +10,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, static_folder='static')
 
 # --- Data Loading and Cleaning ---
-csv_path = os.path.join(basedir, 'WBL_CDAC_Hyd_August_19_2025.xlsx')
-df = pd.read_excel(csv_path)
-df.columns = df.columns.str.strip()
+basedir = os.path.abspath(os.path.dirname(__file__))
+xlsx_path = os.path.join(basedir, "WBL_CDAC_Hyd_August_19_2025.xlsx")  # change filename
+
+# read all sheets as dict of DataFrames
+df = pd.read_excel(xlsx_path, engine="openpyxl")
 
 relevant_columns = ['State', 'Employment Status', 'Cohort', 'Technology', 'Gender', 'Category']
 for col in relevant_columns:
@@ -131,6 +133,12 @@ def create_cohort_details_table(df_filtered):
     return cohort_summary.to_dict('records')
 
 # --- Routes and Views ---
+
+@app.route("/excel")
+def excel_view():
+
+    return df.to_html(classes="table table-striped", index=False)
+
 @app.route('/')
 def index():
     states = ['All'] + sorted(df['State'].unique().tolist())
