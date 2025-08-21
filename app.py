@@ -10,8 +10,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, static_folder='static')
 
 # --- Data Loading and Cleaning ---
-csv_path = os.path.join(basedir, 'WBL_CDAC_Hyd_August_19_2025.csv')
-df = pd.read_csv(csv_path, skiprows=1)
+csv_path = os.path.join(basedir, 'WBL_CDAC_Hyd_August_19_2025.xlsx')
+df = pd.read_excel(csv_path)
 df.columns = df.columns.str.strip()
 
 relevant_columns = ['State', 'Employment Status', 'Cohort', 'Technology', 'Gender', 'Category']
