@@ -3,7 +3,7 @@ import pandas as pd
 from flask import Flask, render_template, jsonify, request
 import plotly.express as px
 from flask_cors import CORS
-import json
+import numpy as np
 
 # --- Flask App Setup ---
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -24,7 +24,7 @@ for col in relevant_columns:
 def create_state_wise_participants_chart(df_filtered):
     if df_filtered.empty:
         fig = px.bar(x=['No Data'], y=[0], title='State-wise Participant Count', template='plotly_white')
-        return fig.to_json()
+        return fig.to_dict()
     
     state_counts = df_filtered['State'].value_counts().reset_index()
     state_counts.columns = ['State', 'Count']
@@ -47,12 +47,12 @@ def create_state_wise_participants_chart(df_filtered):
         yaxis=dict(showgrid=True, gridcolor='rgba(200,200,255,0.2)'),
         transition={'duration': 500, 'easing': 'cubic-in-out'}
     )
-    return fig.to_json()
+    return fig.to_dict()
 
 def create_employment_status_chart(df_filtered):
     if df_filtered.empty:
         fig = px.pie(values=[1], names=['No Data'], title='Employment Status Distribution', template='plotly_white')
-        return fig.to_json()
+        return fig.to_dict()
     
     employment_counts = df_filtered['Employment Status'].value_counts().reset_index()
     employment_counts.columns = ['Employment Status', 'Count']
@@ -69,12 +69,12 @@ def create_employment_status_chart(df_filtered):
                       font=dict(family='Poppins, sans-serif', size=16),
                       margin=dict(t=60, b=40, l=40, r=40),
                       transition={'duration': 500, 'easing': 'cubic-in-out'})
-    return fig.to_json()
+    return fig.to_dict()
 
 def create_technology_distribution_chart(df_filtered):
     if df_filtered.empty:
         fig = px.bar(x=['No Data'], y=[0], title='Technology Domain Distribution', template='plotly_white')
-        return fig.to_json()
+        return fig.to_dict()
     
     technology_counts = df_filtered['Technology'].value_counts().reset_index()
     technology_counts.columns = ['Technology', 'Count']
@@ -95,12 +95,12 @@ def create_technology_distribution_chart(df_filtered):
                       xaxis=dict(showgrid=False, zeroline=False),
                       yaxis=dict(showgrid=True, gridcolor='rgba(200,200,255,0.2)'),
                       transition={'duration': 500, 'easing': 'cubic-in-out'})
-    return fig.to_json()
+    return fig.to_dict()
 
 def create_gender_category_analysis(df_filtered):
     if df_filtered.empty:
         fig = px.bar(x=['No Data'], y=[0], title='Gender and Category Analysis', template='plotly_white')
-        return fig.to_json()
+        return fig.to_dict()
     
     gender_category_counts = df_filtered.groupby(['Gender', 'Category']).size().reset_index(name='Count')
     gender_category_counts['Count'] = pd.to_numeric(gender_category_counts['Count'], errors='coerce').fillna(0)
@@ -118,7 +118,20 @@ def create_gender_category_analysis(df_filtered):
                       xaxis=dict(showgrid=False, zeroline=False),
                       yaxis=dict(showgrid=True, gridcolor='rgba(200,200,255,0.2)'),
                       transition={'duration': 500, 'easing': 'cubic-in-out'})
-    return fig.to_json()
+    return fig.to_dict()
+
+def fig_to_serializable(fig_dict):
+    """Convert any NumPy arrays in a Plotly figure dict to lists."""
+    def convert(obj):
+        if isinstance(obj, dict):
+            return {k: convert(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [convert(i) for i in obj]
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return obj
+    return convert(fig_dict)
 
 def create_cohort_details_table(df_filtered):
     if df_filtered.empty:
@@ -167,12 +180,13 @@ def get_data():
         filtered_df = filtered_df[filtered_df['Employment Status'] == selected_employment_status]
 
     response = {
-        'state_chart_data': json.loads(create_state_wise_participants_chart(filtered_df)),
-        'employment_chart_data': json.loads(create_employment_status_chart(filtered_df)),
-        'technology_chart_data': json.loads(create_technology_distribution_chart(filtered_df)),
-        'gender_category_chart_data': json.loads(create_gender_category_analysis(filtered_df)),
+        'state_chart_data': fig_to_serializable(create_state_wise_participants_chart(filtered_df)),
+        'employment_chart_data': fig_to_serializable(create_employment_status_chart(filtered_df)),
+        'technology_chart_data': fig_to_serializable(create_technology_distribution_chart(filtered_df)),
+        'gender_category_chart_data': fig_to_serializable(create_gender_category_analysis(filtered_df)),
         'cohort_table_data': create_cohort_details_table(filtered_df)
     }
+
     return jsonify(response)
 
 # --- Run App ---
