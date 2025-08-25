@@ -1,10 +1,8 @@
-WBL Repository ,,,,,,,,,,,,,,
-State,Organization,Center,Sl. No.,Cohort,Level,Gender,Candidate's Name,Category,Candidate Status (Joined/Completed/Resigned),Date of Joining,Technology,"Candidate Qualification
-(B.Tech./B.E/M.S.c/M.C.A)",Passed Out Year/Pursuing 7th or 8th semester,Employment Status
+State,Organization,Center,Sl. No.,Cohort,Level,Gender,Candidate's Name,Category,Candidate Status (Joined/Completed/Resigned),Date of Joining,Technology,Candidate Qualification (B.Tech./B.E/M.S.c/M.C.A),Passed Out Year/Pursuing 7th or 8th semester,Employment Status
 Telangana,C-DAC,Hyderabad,1," Cohort 2- L1, 2023",Level-1,Male,Dipak V,ST,Completed,20-03-23,Web Technologies,B.Tech,2023,Unemployed
 Telangana,C-DAC,Hyderabad,2," Cohort 2- L1, 2023",Level-1,Female,Devraj Bavan,SC,Completed,20-03-2023,AI/ML,B.Tech,2023,Unemployed
 Telangana,C-DAC,Hyderabad,3," Cohort 2- L1, 2023",Level-1,Male,P.Deepthi,EWS,Resigned,21-04-2023,Software Technologies,B.Tech,2023,Employed
-Telangana,C-DAC,Hyderabad,4," Cohort 2- L1, 2023",Level-1,Male,D Tejonath,EWS,Completed,21-04-2023,Web development ,B. Tech,2023,Employed
+Telangana,C-DAC,Hyderabad,4," Cohort 2- L1, 2023",Level-1,Male,D Tejonath,EWS,Completed,21-04-2023,Web Development ,B. Tech,2023,Employed
 Telangana,C-DAC,Hyderabad,5," Cohort 2- L1, 2023",Level-1,Male,P Ramyasri,SC,Completed,21-04-2023,Web Development,B. Tech,2023,Employed
 Telangana,C-DAC,Hyderabad,6," Cohort 2- L1, 2023",Level-1,Male,P. Chandini,ST,Completed,22-04-2023,Web Development,B.Tech,2023,
 Telangana,C-DAC,Hyderabad,7," Cohort 2- L1, 2023",Level-1,Female,Madala Aswanitejasri,ST,Completed,21-04-2023,Mobile Apps,B.Tech,2023,

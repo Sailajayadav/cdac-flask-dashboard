@@ -12,19 +12,11 @@
 <body class="bg-gradient-to-br from-blue-50 to-purple-100 min-h-screen">
     <div class="container mx-auto px-4">
         <header class="text-center py-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-b-lg mb-8 shadow-lg">
-            <h1 class="text-4xl font-bold mb-2">WBL Data Dashboard</h1>
-            <p class="text-lg">Interactive analytics of participant data.</p>
+            <p class="text-lg font-bold tracking-wide drop-shadow-lg">Interactive analytics of participant data.</p>
         </header>
         <main>
-            <div class="flex flex-wrap gap-4 justify-center items-center mb-8 p-4 bg-white rounded-lg shadow">
-                <div>
-                    <label for="state-dropdown" class="font-semibold mr-2">State:</label>
-                    <select id="state-dropdown" class="border rounded px-2 py-1">
-                        {% for state in states %}
-                            <option value="{{ state }}">{{ state }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <div class="flex flex-wrap gap-4 justify-center items-center mb-8 p-4 bg-gradient-to-r from-pink-100 via-blue-100 to-purple-100 rounded-lg shadow">
+                <!-- State dropdown removed as per requirements -->
                 <div>
                     <label for="cohort-dropdown" class="font-semibold mr-2">Cohort:</label>
                     <select id="cohort-dropdown" class="border rounded px-2 py-1">
@@ -38,6 +30,14 @@
                     <select id="gender-dropdown" class="border rounded px-2 py-1">
                         {% for gender in genders %}
                             <option value="{{ gender }}">{{ gender }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="category-dropdown" class="font-semibold mr-2">Category:</label>
+                    <select id="category-dropdown" class="border rounded px-2 py-1">
+                        {% for category in categories %}
+                            <option value="{{ category }}">{{ category }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -58,85 +58,115 @@
                     </select>
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105">
-                    <h3 class="text-xl font-semibold mb-4">State-wise Participant Count</h3>
-                    <div id="state-wise-participants-chart"></div>
+            <div class="grid grid-cols-2 gap-8">
+                <div class="bg-gradient-to-br from-yellow-100 to-pink-200 rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105 flex flex-col items-center justify-center border-2 border-yellow-300">
+                    <h3 class="text-xl font-semibold mb-4 text-yellow-700">Total Participant Count</h3>
+                    <div id="total-participant-count" class="rounded-full bg-yellow-200 text-5xl font-extrabold text-yellow-700 px-8 py-4 shadow-lg border-4 border-yellow-400"></div>
                 </div>
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105">
-                    <h3 class="text-xl font-semibold mb-4">Employment Status Distribution</h3>
+                <div class="bg-gradient-to-br from-blue-100 to-purple-200 rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105 border-2 border-blue-300">
+                    <h3 class="text-xl font-semibold mb-4 text-blue-700">Employment Status Distribution</h3>
                     <div id="employment-status-chart"></div>
                 </div>
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105">
-                    <h3 class="text-xl font-semibold mb-4">Technology Domain Distribution</h3>
-                    <div id="technology-distribution-chart"></div>
+                <div class="bg-gradient-to-br from-green-100 to-teal-200 rounded-lg shadow-lg p-6 flex-1 transition-transform hover:scale-105 flex flex-col justify-between min-h-[500px] border-2 border-green-300">
+                    <h3 class="text-xl font-semibold mb-4 text-green-700">Male Category Analysis</h3>
+                    <div id="gender-category-analysis-chart" class="w-full h-full min-h-[350px] bg-white rounded-lg shadow"></div>
                 </div>
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6 transition-transform hover:scale-105">
-                    <h3 class="text-xl font-semibold mb-4">Gender and Category Analysis</h3>
-                    <div id="gender-category-analysis-chart"></div>
+                <div class="bg-gradient-to-br from-pink-100 to-purple-200 rounded-lg shadow-lg p-6 flex-1 transition-transform hover:scale-105 flex flex-col justify-between min-h-[500px] border-2 border-pink-300">
+                    <h3 class="text-xl font-semibold mb-4 text-pink-700">Female Category Analysis</h3>
+                    <div id="gender-category-analysis-chart-female" class="w-full h-full min-h-[350px] bg-white rounded-lg shadow"></div>
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
-                <h3 class="text-xl font-semibold mb-4">Cohort Details Table</h3>
-                <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-xl font-semibold mb-4 text-purple-700">Technology Domain Analysis</h3>
+                <div id="technology-distribution-chart"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
+                <h3 class="text-xl font-semibold mb-4 text-blue-700">Cohort Details Table</h3>
+                <div class="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-lg shadow p-4 border-2 border-blue-200">
                     <div id="cohort-details-table"></div>
                 </div>
             </div>
+            <!-- Category-wise Participant Count table removed as requested -->
         </main>
     </div>
     <script>
-        const stateDropdown = document.getElementById('state-dropdown');
         const cohortDropdown = document.getElementById('cohort-dropdown');
         const genderDropdown = document.getElementById('gender-dropdown');
+        const categoryDropdown = document.getElementById('category-dropdown');
         const technologyDropdown = document.getElementById('technology-dropdown');
         const employmentStatusDropdown = document.getElementById('employment-status-dropdown');
+
         function updateVisualizations() {
             const params = new URLSearchParams({
-                state: stateDropdown.value,
                 cohort: cohortDropdown.value,
                 gender: genderDropdown.value,
+                category: categoryDropdown.value,
                 technology: technologyDropdown.value,
                 employment_status: employmentStatusDropdown.value
             });
             axios.get(`/api/data?${params.toString()}`)
-            .then(response => {
-                const data = response.data;
-                console.log('Data received for visualizations:', data);
-                
-                Plotly.newPlot('state-wise-participants-chart', data.state_chart_data.data, data.state_chart_data.layout);
-                Plotly.newPlot('employment-status-chart', data.employment_chart_data.data, data.employment_chart_data.layout);
-                Plotly.newPlot('technology-distribution-chart', data.technology_chart_data.data, data.technology_chart_data.layout);
-                Plotly.newPlot('gender-category-analysis-chart', data.gender_category_chart_data.data, data.gender_category_chart_data.layout);
+                .then(response => {
+                    const data = response.data;
+                    // Show total participant count
+                    document.getElementById('total-participant-count').innerText = data.total_participant_count;
+                    Plotly.newPlot('employment-status-chart', data.employment_chart_data.data, data.employment_chart_data.layout);
+                    // Show separate male and female category charts
+                    if (data.gender_category_chart_data.male) {
+                        // Only show the count as label, not tuple
+                        let maleData = JSON.parse(JSON.stringify(data.gender_category_chart_data.male.data));
+                        if (maleData[0] && Array.isArray(maleData[0].text)) {
+                            maleData[0].text = maleData[0].y;
+                        }
+                        Plotly.newPlot('gender-category-analysis-chart', maleData, data.gender_category_chart_data.male.layout, {responsive: true});
+                    }
+                    if (data.gender_category_chart_data.female) {
+                        let femaleData = JSON.parse(JSON.stringify(data.gender_category_chart_data.female.data));
+                        if (femaleData[0] && Array.isArray(femaleData[0].text)) {
+                            femaleData[0].text = femaleData[0].y;
+                        }
+                        Plotly.newPlot('gender-category-analysis-chart-female', femaleData, data.gender_category_chart_data.female.layout, {responsive: true});
+                    }
+                    // Show technology domain chart
+                    if (data.technology_chart_data) {
+                        Plotly.newPlot('technology-distribution-chart', data.technology_chart_data.data, data.technology_chart_data.layout, {responsive: true});
+                    }
 
-                const tableContainer = document.getElementById('cohort-details-table');
-                tableContainer.innerHTML = '';
-                if (data.cohort_table_data.length > 0) {
-                    let tableHTML = `<table class="data-table"><thead><tr>
-                                        <th>Cohort</th>
-                                        <th>Participant Count</th>
-                                    </tr></thead><tbody>`;
-                    data.cohort_table_data.forEach(row => {
-                        tableHTML += `<tr>
-                                        <td>${row.Cohort}</td>
-                                        <td>${row['Participant Count']}</td>
-                                    </tr>`;
-                    });
-                    tableHTML += `</tbody></table>`;
-                    tableContainer.innerHTML = tableHTML;
-                } else {
-                    tableContainer.innerHTML = `<p class="text-center text-gray-500">No data available for the selected filters.</p>`;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching data for visualizations:', error);
-            });
-
+                    const tableContainer = document.getElementById('cohort-details-table');
+                    tableContainer.innerHTML = '';
+                    if (data.cohort_table_data.length > 0) {
+                        let tableHTML = `<table class="data-table w-full text-left border border-gray-400"><thead><tr>
+                            <th class="px-4 py-2 border border-gray-400">Cohort</th>
+                            <th class="px-4 py-2 border border-gray-400">Level</th>
+                            <th class="px-4 py-2 border border-gray-400">Year</th>
+                            <th class="px-4 py-2 border border-gray-400">Participant Count</th>
+                        </tr></thead><tbody>`;
+                        data.cohort_table_data.forEach(row => {
+                            if (row.Count > 0) {
+                                tableHTML += `<tr>
+                                    <td class="border border-gray-400 px-4 py-2">${row.Cohort}</td>
+                                    <td class="border border-gray-400 px-4 py-2">${row.Level}</td>
+                                    <td class="border border-gray-400 px-4 py-2">${row.Year}</td>
+                                    <td class="border border-gray-400 px-4 py-2">${row.Count}</td>
+                                </tr>`;
+                            }
+                        });
+                        tableHTML += `</tbody></table>`;
+                        tableContainer.innerHTML = tableHTML;
+                    } else {
+                        tableContainer.innerHTML = `<p class="text-center text-gray-500">No data available for the selected filters.</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data for visualizations:', error);
+                });
         }
-        stateDropdown.addEventListener('change', updateVisualizations);
+
         cohortDropdown.addEventListener('change', updateVisualizations);
         genderDropdown.addEventListener('change', updateVisualizations);
+        categoryDropdown.addEventListener('change', updateVisualizations);
         technologyDropdown.addEventListener('change', updateVisualizations);
         employmentStatusDropdown.addEventListener('change', updateVisualizations);
+
         document.addEventListener('DOMContentLoaded', () => {
             updateVisualizations();
         });
